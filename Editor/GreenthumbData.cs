@@ -1,12 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu]
 public class GreenthumbData : ScriptableObject
 {
-    public PaletteItemData[] PaletteItems;
+    public List<PaletteItemData> PaletteItems = new List<PaletteItemData>();
+    public BrushSettings BrushSettings;
 
-    public LayerMask DefaultLayer;
-    public LayerMask BackupLayer = 4;
+    public string Layer;
+    public string BackupLayer = "Water";
 
     [HideInInspector] [SerializeReference] private GameObject _objParent;
     public GameObject ObjParent

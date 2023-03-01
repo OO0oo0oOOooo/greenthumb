@@ -3,24 +3,32 @@ using UnityEditor;
 
 public static class GreenthumbUtils
 {
-    public static int CreateLayer(string layerName, int backupLayerIndex)
+
+    public static int CreateLayer(LayerMask layer, LayerMask backupLayer, string nullLayerInitName)
     {
         SerializedObject tagManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
-        SerializedProperty layers = tagManager.FindProperty("layers");
+        SerializedProperty propLayersArr = tagManager.FindProperty("layers");
 
-        // Find the first unused layer index
-        int layerIndex = -1;
-        for (int i = 8; i < layers.arraySize; i++)
+        string layerName = LayerMask.LayerToName(layer);
+
+        if(string.IsNullOrEmpty(layerName))
         {
-            SerializedProperty layer = layers.GetArrayElementAtIndex(i);
-            if (layer.stringValue == layerName)
+            layerName = nullLayerInitName;
+        }
+
+        int layerIndex = -1;
+        for (int i = 8; i < propLayersArr.arraySize; i++)
+        {
+            SerializedProperty propLayer = propLayersArr.GetArrayElementAtIndex(i);
+            if (propLayer.stringValue == layerName)
             {
                 // The layer already exists
-                // Debug.Log("Layer exists: " + i + ", " + layer.stringValue);
+                // Debug.Log("Layer exists: " + propLayer.stringValue + " ID: " + i);
                 return i;
             }
-            if (layer.stringValue == "")
+            if (propLayer.stringValue == "")
             {
+                // Empty layer found
                 layerIndex = i;
                 break;
             }
@@ -29,16 +37,15 @@ public static class GreenthumbUtils
         if (layerIndex == -1)
         {
             // No unused layer indices found
-            Debug.Log("No available layers. Defaulting to: " + LayerMask.LayerToName(backupLayerIndex));
-            return backupLayerIndex;
+            Debug.Log("No available layers. Defaulting to: " + LayerMask.LayerToName(backupLayer));
+            return backupLayer;
         }
 
-        // Set the layer name and save the changes
-        SerializedProperty layerProp = layers.GetArrayElementAtIndex(layerIndex);
-        layerProp.stringValue = layerName;
+        SerializedProperty newLayer = propLayersArr.GetArrayElementAtIndex(layerIndex);
+        newLayer.stringValue = layerName;
         tagManager.ApplyModifiedProperties();
 
-        Debug.Log("Created new layer: " + layerProp.stringValue + ", " + layerIndex);
+        // Debug.Log("Created new layer: " + newLayer.stringValue + " ID: " + layerIndex);
         return layerIndex;
     }
 

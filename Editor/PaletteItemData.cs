@@ -3,9 +3,9 @@ using UnityEngine;
 [CreateAssetMenu]
 public class PaletteItemData : ScriptableObject
 {
-    public GameObject Obj;
-    public string ParentName;
+    public GameObject Prefab;
+    public Vector3 ScaleSlider = Vector3.one;
 
-    public Vector3[] Scale;
+    public Vector3[] ScaleWeighted;
     public int[] weights;
 }

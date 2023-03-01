@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEditor;
-using System;
+using System.Collections.Generic;
 
 // TODO:
 // Palette
@@ -9,80 +9,76 @@ using System;
 // Undo
 
 // Saving and loading
-// // Parent, Palette, Layers
+// // Palette
+
+// SetScaleMode runs every time an item is placed I couldnt get OnValidate to work
 
 // All of grass stuff
 
 public class GreenthumbEditor : EditorWindow
 {
-    private GUIContent[] _tabs;
-    private int _tabSelected = -1;
+    [SerializeField] private GreenthumbData _data;
+    private BrushSettings _brushSettings;
 
+    SerializedObject _so;
+    SerializedProperty propPaletteItems;
+    
+
+    [SerializeField] private List<PaletteItemData> _paletteItems = new List<PaletteItemData>();
+    [SerializeField] private PaletteItemData _selectedPaletteItem;
+
+    private GameObject _objParent;
+
+    private LayerMask _layer;
+    private LayerMask _backupLayer;
+
+    // Toolbar
     private enum Tabs
     {
         Tree, Grass, Settings
     }
-
-    ScaleOption _scaleOption;
-    private enum ScaleOption
-    {
-        Slider, RandomWeighted
-    }
-
-    // Brush Settings
-
-    [Range(0, 100)]
-    private float _brushSize = 5f;
-
-    [Range(0, 10)]
-    private float _brushDensity = 2;
-
-    // Normal Settomgs
-    [Range(0, 1)]
-    private float _brushNormalLimit = 0;
-
-    [Range(0, 1)] // 0 Normal has no effect, 1 Fully faces normal
-    private float _brushNormalWeight = 1;
-
-
-    // Object Settings
-    private float _width = 0.75f;
-    private float _height = 1;
-
-
-    [SerializeField] private GreenthumbData _data;
-    private PaletteItemData _treePreset;
-    private PaletteItemData[] _paletteItems;
-    private GameObject _objParent;
-
-    // layer
-    private LayerMask _defaultlayer;
-    private LayerMask _backupLayer = 4;
-    private string _defaultLayerName = "Greenthumb";
+    private GUIContent[] _tabs;
+    private int _tabSelected = -1;
 
 
     // Input Event Parameters
     private bool _isMouseDown = false;
     private bool _isButtonHeld = false;
-    
     private float _mouseDownTime;
+
+    // Size
+    private Vector3 _scale = Vector3.one;
+    private ScaleOption _scaleOption;
+    private enum ScaleOption
+    {
+        Slider, RandomWeighted
+    }
 
     void OnEnable()
     {
         LoadData();
         
-        // TODO: Look into this because i am saving the layer now
-        _defaultlayer = GreenthumbUtils.CreateLayer(_defaultLayerName, _backupLayer);
+        _so = new SerializedObject(this);
+        propPaletteItems = _so.FindProperty("_paletteItems");
 
+        if(_paletteItems.Count != 0) 
+        {
+            _selectedPaletteItem = _paletteItems[0];
+            // _selectedPaletteItem = propPaletteItems.GetArrayElementAtIndex(0);
+        }
+
+        _layer = GreenthumbUtils.CreateLayer(_layer, _backupLayer, "Greenthumb");
+        
         Texture _treeIcon = (Texture)Resources.Load("Icons/pine-tree", typeof(Texture));
         Texture _grassIcon = (Texture)Resources.Load("Icons/grass", typeof(Texture));
         Texture _cogIcon = (Texture)Resources.Load("Icons/cog", typeof(Texture));
 
         _tabs = new GUIContent[] { new GUIContent(_treeIcon), new GUIContent(_grassIcon), new GUIContent(_cogIcon) };
 
-        SceneView.duringSceneGui += this.OnSceneGUI;
-
+        
         SaveData();
+
+        SceneView.duringSceneGui += this.OnSceneGUI;
     }
 
     void OnDisable()
@@ -104,27 +100,32 @@ public class GreenthumbEditor : EditorWindow
             AssetDatabase.Refresh();
 
             // Remove this after getting it to work with packages
-            Debug.Log("Creating new GreenthumbData");
+            Debug.Log("Creating new data object.");
         }
 
         _paletteItems = _data.PaletteItems;
-        _defaultlayer = _data.DefaultLayer;
-        _backupLayer = _data.BackupLayer;
+        _brushSettings = _data.BrushSettings;
+
+        _layer = LayerMask.NameToLayer(_data.Layer);
+        _backupLayer = LayerMask.NameToLayer(_data.BackupLayer);
         _objParent = _data.ObjParent;
     }
 
     private void SaveData()
     {
+        _so.ApplyModifiedProperties();
+
         _data.PaletteItems = _paletteItems;
-        _data.DefaultLayer = _defaultlayer;
-        _data.BackupLayer = _backupLayer;
+        _data.BrushSettings = _brushSettings;
+
+        _data.Layer = LayerMask.LayerToName(_layer);
+        _data.BackupLayer = LayerMask.LayerToName(_backupLayer);
         _data.ObjParent = _objParent;
 
         EditorUtility.SetDirty(_data);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
     }
-
 
     // EDITOR WINDOW INTERACTION
     void OnGUI()
@@ -159,13 +160,13 @@ public class GreenthumbEditor : EditorWindow
         using ( new GUILayout.HorizontalScope() ) 
         {
             GUILayout.Label("Brush Size");
-            _brushSize = EditorGUILayout.Slider(_brushSize, 0, 100);
+            _brushSettings.BrushSize = EditorGUILayout.Slider(_brushSettings.BrushSize, 0, 100);
         }
 
         using ( new GUILayout.HorizontalScope() ) 
         {
             GUILayout.Label("Density");
-            _brushDensity = EditorGUILayout.Slider(_brushDensity, 0, 10);
+            _brushSettings.BrushDensity = EditorGUILayout.Slider(_brushSettings.BrushDensity, 0, 10);
         }
 
         GUILayout.Space(20);
@@ -174,12 +175,12 @@ public class GreenthumbEditor : EditorWindow
         using ( new GUILayout.HorizontalScope() )
         {
             GUILayout.Label("Normal Limit");
-            _brushNormalLimit = EditorGUILayout.Slider(_brushNormalLimit, 0, 1);
+            _brushSettings.BrushNormalLimit = EditorGUILayout.Slider(_brushSettings.BrushNormalLimit, 0, 1);
         }
         using ( new GUILayout.HorizontalScope() )
         {
             GUILayout.Label("Normal Weight");
-            _brushNormalWeight = EditorGUILayout.Slider(_brushNormalWeight, 0, 1);
+            _brushSettings.BrushNormalWeight = EditorGUILayout.Slider(_brushSettings.BrushNormalWeight, 0, 1);
         }
 
         GUILayout.Space(20);
@@ -187,18 +188,21 @@ public class GreenthumbEditor : EditorWindow
         GUILayout.Label("Object Size");
         _scaleOption = (ScaleOption)EditorGUILayout.EnumPopup(_scaleOption);
 
-        if(_scaleOption == ScaleOption.Slider)
+        if(_selectedPaletteItem != null)
         {
-            using ( new GUILayout.HorizontalScope() )
+            if(_scaleOption == ScaleOption.Slider)
             {
-                GUILayout.Label("Width");
-                _width = EditorGUILayout.FloatField(_width);
-            }
+                using ( new GUILayout.HorizontalScope() )
+                {
+                    GUILayout.Label("Width");
+                    _selectedPaletteItem.ScaleSlider.x = EditorGUILayout.FloatField(_selectedPaletteItem.ScaleSlider.x);
+                }
 
-            using ( new GUILayout.HorizontalScope() )
-            {
-                GUILayout.Label("Height");
-                _height = EditorGUILayout.FloatField(_height);
+                using ( new GUILayout.HorizontalScope() )
+                {
+                    GUILayout.Label("Height");
+                    _selectedPaletteItem.ScaleSlider.y = EditorGUILayout.FloatField(_selectedPaletteItem.ScaleSlider.y);
+                }
             }
         }
     }
@@ -206,7 +210,8 @@ public class GreenthumbEditor : EditorWindow
     private void TreeGUI()
     {
         // Content Pallette
-        _treePreset = EditorGUILayout.ObjectField("", _treePreset, typeof(PaletteItemData), true) as PaletteItemData;
+        EditorGUILayout.PropertyField(propPaletteItems);
+        _selectedPaletteItem = EditorGUILayout.ObjectField("", _selectedPaletteItem, typeof(PaletteItemData), true) as PaletteItemData;
 
         GUILayout.Space(20);
 
@@ -233,7 +238,7 @@ public class GreenthumbEditor : EditorWindow
         // Should be ok to enable if data serialized. right now i think it would recreate the "Greenthumb" Layer every OnEnable() if it was removed
         GUILayout.Label("Primary Layer");
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUILayout.LayerField(_defaultlayer);
+        EditorGUILayout.LayerField(_layer);
         EditorGUI.EndDisabledGroup();
 
         GUILayout.Label("Backup Layer");
@@ -254,7 +259,7 @@ public class GreenthumbEditor : EditorWindow
             if (hit.collider.gameObject != null)
             {
                 Handles.DrawLine(hit.point, hit.point + hit.normal);
-                Handles.DrawWireDisc(hit.point, hit.normal, _brushSize);
+                Handles.DrawWireDisc(hit.point, hit.normal, _brushSettings.BrushSize);
             }
         }
 
@@ -301,19 +306,19 @@ public class GreenthumbEditor : EditorWindow
         }
     }
 
-    private void Place(int tab, int palletteIndex, RaycastHit hit)
+    private void Place(int tab, int paletteIndex, RaycastHit hit)
     {
-        InstatiatePrefab(hit);
+        InstatiatePrefab(hit, _selectedPaletteItem.Prefab, _objParent, _scale, _brushSettings.BrushNormalLimit, _brushSettings.BrushNormalWeight, _layer);
     }
 
-    private void Paint(int tab, int palletteIndex, RaycastHit hit)
+    private void Paint(int tab, int paletteIndex, RaycastHit hit)
     {
-        Brush(hit, _brushSize, _brushDensity, 1, _defaultlayer);
+        Brush(hit, _brushSettings.BrushSize, _brushSettings.BrushDensity, 1, _layer);
     }
 
     private void Erase(int tab, int palletteIndex, RaycastHit hit)
     {
-        RemovePrefab(hit);
+        RemovePrefab(hit, _brushSettings.BrushSize);
     }
 
     public void Brush(RaycastHit hit, float brushSize, float density, float distance, int layerID)
@@ -348,40 +353,30 @@ public class GreenthumbEditor : EditorWindow
             }
             
             // Instatiate
-            InstatiatePrefab(hitInfo);
+            InstatiatePrefab(hitInfo, _selectedPaletteItem.Prefab, _objParent, _scale, _brushSettings.BrushNormalLimit, _brushSettings.BrushNormalWeight, _layer);
         }
         
     }
 
-    private void InstatiatePrefab(RaycastHit hit)
+    private void InstatiatePrefab(RaycastHit hit, GameObject prefab, GameObject parent, Vector3 scale, float normalLimit, float normalWeight, int layer)
     {
-        Quaternion rotNormal = Quaternion.identity.WeightedNormal(hit.normal, _brushNormalWeight).RandomizeAxisRotation(new Vector3(0, 180, 0));
+        Quaternion rotNormal = Quaternion.identity.WeightedNormal(hit.normal, normalWeight).RandomizeAxisRotation(new Vector3(0, 180, 0));
         Quaternion rot = rotNormal.RandomizeAxisRotation(new Vector3(0, 180, 0));
         float dot = Quaternion.Dot(Quaternion.identity.WeightedNormal(hit.normal), Quaternion.identity);
 
-        if(dot <= _brushNormalLimit)
-        {
-            return;
-        }
+        if(dot <= normalLimit) { return; }
 
-        GameObject newObject = Instantiate(_treePreset.Obj, hit.point, rot, _objParent.transform);
+        scale = SetScaleMode(scale);
 
-        GreenthumbUtils.SetLayerRecursively(newObject, _defaultlayer);
-
-        if(_scaleOption == ScaleOption.Slider)
-        {
-            newObject.transform.localScale = new Vector3(_width, _height, _width);
-        }
-        if(_scaleOption == ScaleOption.RandomWeighted)
-        {
-            newObject.transform.localScale = _treePreset.Scale[GreenthumbUtils.WeightedRandom(_treePreset.weights)];
-        }
+        GameObject newObject = Instantiate(prefab, hit.point, rot, parent.transform);
+        GreenthumbUtils.SetLayerRecursively(newObject, layer);
+        newObject.transform.localScale = scale;
     }
 
-    private void RemovePrefab(RaycastHit hit)
+    private void RemovePrefab(RaycastHit hit, float size)
     {
-        int layerMask = 1 << _defaultlayer;
-        Collider[] hitColliders = Physics.OverlapSphere(hit.point, _brushSize, layerMask);
+        int layerMask = 1 << _layer;
+        Collider[] hitColliders = Physics.OverlapSphere(hit.point, size, layerMask);
         foreach (var hitCollider in hitColliders)
         {
             // Double check incase of stray Objects in this layer
@@ -409,6 +404,15 @@ public class GreenthumbEditor : EditorWindow
         Debug.Log("Remove Grass");
     }
 
+    public Vector3 SetScaleMode(Vector3 scale)
+    {
+        if(_scaleOption == ScaleOption.Slider)
+            scale = _selectedPaletteItem.ScaleSlider;
+        else if(_scaleOption == ScaleOption.RandomWeighted)
+            scale = _selectedPaletteItem.ScaleWeighted[GreenthumbUtils.WeightedRandom(_selectedPaletteItem.weights)];
+
+        return scale;
+    }
 
     [MenuItem("Tools/Green thumb")]
     public static void ShowWindow()
