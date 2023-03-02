@@ -4,9 +4,12 @@ using System;
 [Serializable]
 public class BrushSettings
 {
-    [Header("Brush Parameters")]
+    // [Header("Brush Parameters")]
     [SerializeField] [Range(0, 100)] private float _brushSize = 5f;
     [SerializeField] [Range(0, 10)] private float _brushDensity = 2;
+
+    // [Header("Normal Parameters")]
+    [Header("")]
     [SerializeField] [Range(0, 1)] private float _brushNormalLimit = 0;
     [SerializeField] [Range(0, 1)] private float _brushNormalWeight = 1;
 

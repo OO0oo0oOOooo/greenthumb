@@ -13,7 +13,7 @@ public class GreenthumbData : ScriptableObject
     [HideInInspector] [SerializeReference] private GameObject _objParent;
     public GameObject ObjParent
     {
-        get 
+        get
         {
             if(_objParent == null)
             {
