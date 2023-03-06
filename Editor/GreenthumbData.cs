@@ -15,13 +15,13 @@ public class GreenthumbData : ScriptableObject
     {
         get
         {
-            // if(_objParent == null)
-            // {
-            //     GameObject obj = new GameObject();
-            //     obj.name = "Greenthumb Group";
+            if(_objParent == null)
+            {
+                GameObject obj = new GameObject();
+                obj.name = "Greenthumb Group";
                 
-            //     return obj;
-            // }
+                return obj;
+            }
 
             return _objParent;
         }

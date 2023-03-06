@@ -10,16 +10,7 @@ using System;
 
 // Undo
 
-// Stop generating layers
-// Get user to set layer
-
-// Stop Generating parent
-// Get user to set parent
-
-// Erase only checks layer
-
 // Saving and loading
-// // Compiling regenerates the entire project for some reason
 // // Palette
 
 // SetScaleMode runs every time an item is placed I couldnt get OnValidate to work
@@ -44,18 +35,6 @@ public class GreenthumbEditor : EditorWindow
     private GUIContent _paletteItemsLabel = new GUIContent("Palette Item");
     private GUIContent _brushSettingsLabel = new GUIContent("Brush Settings");
     private Vector2 _scrollPosition = Vector2.zero;
-
-    static GUIStyle _helpBoxStyle;
-    public static GUIStyle HelpBoxStyle
-    {
-        get
-        {
-            if(_helpBoxStyle == null)
-                _helpBoxStyle = new GUIStyle(EditorStyles.helpBox);
-
-            return _helpBoxStyle;
-        }
-    }
 
     private GameObject _objParent;
 
@@ -106,7 +85,7 @@ public class GreenthumbEditor : EditorWindow
 
     private void LoadData()
     {
-        // _data = AssetDatabase.LoadAssetAtPath<GreenthumbData>("Assets/Greenthumb/Resources/GreenthumbData.asset"); // //
+        // _data = AssetDatabase.LoadAssetAtPath<GreenthumbData>("Assets/Greenthumb/Resources/GreenthumbData.asset");
         _data = (GreenthumbData)Resources.Load("GreenThumbData", typeof(GreenthumbData));
 
         if (_data == null)
@@ -149,7 +128,7 @@ public class GreenthumbEditor : EditorWindow
     void OnGUI()
     {
         _so.Update();
-
+        
         using ( new GUILayout.VerticalScope() ) 
         {
             _tabSelected = GUILayout.Toolbar(_tabSelected, _tabs);
@@ -179,10 +158,13 @@ public class GreenthumbEditor : EditorWindow
     private void TreeGUI()
     {
         if(_selectedPalette == null)
-            GUILayout.Label("Create new Palette");
+        {
+            BrushGUI();
+            PrefabSettingsGUI();
+        }
         
-        BrushGUI();
-        PrefabSettingsGUI();
+        PaletteSelection();
+
         PaletteDisplay();
     }
 
@@ -223,7 +205,7 @@ public class GreenthumbEditor : EditorWindow
 
     private void BrushGUI()
     {
-        EditorGUILayout.BeginVertical(HelpBoxStyle);
+        EditorGUILayout.BeginVertical("HelpBox");
         if(_showBrushSettings = EditorGUILayout.Foldout(_showBrushSettings, "Brush Settings"))
         {
             // EditorGUILayout.PropertyField(_propBrushSettings);
@@ -241,7 +223,7 @@ public class GreenthumbEditor : EditorWindow
     private void PrefabSettingsGUI()
     {
         SerializedProperty prop = _so.FindProperty("_selectedPaletteItem");
-        EditorGUILayout.BeginVertical(HelpBoxStyle);
+        EditorGUILayout.BeginVertical("HelpBox");
 
         if(_showPaletteItems = EditorGUILayout.Foldout(_showPaletteItems, "Palette Item"))
         {
@@ -269,6 +251,50 @@ public class GreenthumbEditor : EditorWindow
             EditorGUI.EndProperty();
         }
         EditorGUILayout.EndVertical();
+    }
+
+    int selectedPaletteIndex = 0;
+    string[] paletteNames = new string[]
+    {
+        "Palette", "Palette 1", "Palette 2", "Palette 3", "Palette 4", "Palette 5", "Palette 6", "Palette 7", "Palette 8", "Palette 9"
+    };
+
+    private void PaletteSelection()
+    {
+        using ( new GUILayout.HorizontalScope() )
+        {
+            selectedPaletteIndex = EditorGUILayout.Popup(selectedPaletteIndex, paletteNames, "ToolbarPopup");
+
+            if(GUILayout.Button("New", "ToolbarButton"))
+            {
+                // Create New Palette
+                GTPalette palette = CreateInstance<GTPalette>();
+
+                string filePath = "Assets/Greenthumb/Resources/";
+                string uniqueFileName = AssetDatabase.GenerateUniqueAssetPath(filePath + "Palette.asset");
+
+                AssetDatabase.CreateAsset(palette, uniqueFileName);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+
+                Debug.Log("Creating new Palette.");
+            }
+
+            if(GUILayout.Button("Del", "ToolbarButton"))
+            {
+                string paletteName = paletteNames[selectedPaletteIndex];
+                string filePath = $"Assets/Greenthumb/Resources/{paletteName}.asset";
+
+                if (AssetDatabase.LoadAssetAtPath<GTPalette>(filePath) != null)
+                {
+                    // Asset exists
+                    AssetDatabase.DeleteAsset(filePath);
+                    AssetDatabase.SaveAssets();
+                    AssetDatabase.Refresh();
+                }
+                else Debug.Log("Asset doesnt exist.");
+            }
+        }
     }
 
     private void PaletteDisplay()
