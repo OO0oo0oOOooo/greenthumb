@@ -9,7 +9,7 @@ public class BrushSettings
     [SerializeField] [Range(0, 10)] private float _brushDensity = 2;
 
     // [Header("Normal Parameters")]
-    // [Header("")]
+    [Header("")]
     [SerializeField] [Range(0, 1)] private float _brushNormalLimit = 0;
     [SerializeField] [Range(0, 1)] private float _brushNormalWeight = 1;
 

@@ -61,7 +61,7 @@ public static class GreenthumbUtils
         }
     }
 
-    public static GameObject FindRootByParent(GameObject obj, GameObject desiredParent)
+    public static GameObject FindDesiredRoot(GameObject obj, GameObject desiredParent)
     {
         if (obj == null)
         {
@@ -69,18 +69,6 @@ public static class GreenthumbUtils
         }
 
         while(obj.transform.parent != null && obj.transform.parent.gameObject != desiredParent)
-        {
-            obj = obj.transform.parent.gameObject;
-        }
-
-        return obj;
-    }
-
-    public static GameObject FindRootByLayer(GameObject obj, int layer)
-    {
-        if (obj == null) return null;
-
-        while(obj.transform.parent != null && obj.transform.parent.gameObject.layer == layer)
         {
             obj = obj.transform.parent.gameObject;
         }
