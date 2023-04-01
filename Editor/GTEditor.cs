@@ -15,6 +15,10 @@ public partial class GTEditor
     Greenthumb _target;
     SerializedObject _so;
 
+    SerializedProperty _propMesh;
+    SerializedProperty _propMaterial;
+
+    [SerializeField] private GreenthumbData _data;
     [SerializeField] private BrushSettings _brushSettings;
     
     private GUIContent _brushSettingsLabel = new GUIContent("Brush Settings");
@@ -38,6 +42,8 @@ public partial class GTEditor
         LoadData();
 
         _so = serializedObject;
+        _propMesh = _so.FindProperty("SelectedMesh");
+        _propMaterial = _so.FindProperty("SelectedMaterial");
 
         // Get/Create layer
         _layer = GreenthumbUtils.CreateLayer(_layer, _backupLayer, "Greenthumb");
@@ -106,7 +112,7 @@ public partial class GTEditor
 
     private void InitPaletteNames()
     {
-        foreach (GTPalette p in _palettes)
+        foreach (PrefabPalette p in _palettes)
         {
             _paletteNames.Add(p.name);
         }
