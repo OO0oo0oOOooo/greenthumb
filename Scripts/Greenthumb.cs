@@ -8,7 +8,8 @@ using UnityEngine.Rendering;
 public class Greenthumb : MonoBehaviour
 {
     // TODO: See if you can remove this
-    public PrefabPaletteItem _selectedItem;
+    public PrefabPaletteItem _selectedPaletteItem;
+    public DetailPaletteItem _selectedDetailItem;
 
     // TODO: Use a individual class for each Palette Item
 
@@ -50,7 +51,7 @@ public class Greenthumb : MonoBehaviour
 
     private void OnEnable()
     {
-        _selectedItem = null;
+        _selectedPaletteItem = null;
 
         // I dont know why this works and i dont want to know why. For some reason using 
         // the code raw from OnEnable() doesnt set up the chunk right.
