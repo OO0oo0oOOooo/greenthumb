@@ -96,7 +96,6 @@ public partial class GTEditor
 
     private void SaveData()
     {
-        // _data.PaletteList = _palettes;
         _data.PaletteDataPrefab = _palettePrefab;
         _data.PaletteDataDetails = _paletteDetail;
 
@@ -110,17 +109,6 @@ public partial class GTEditor
 
     private void InitPaletteData()
     {
-        // _palettes = _data.PaletteList;
-
-        // if(_palettes.Count > 0)
-        // {
-        //     _selectedPalette = _palettes[0];
-        //     _selectedPaletteIndex = 0;
-        //     _selectedPaletteItem = GetSelectedPalette.Palette[0];
-
-        //     InitPaletteNames();
-        // }
-
         if(_palettePrefab.PaletteList.Count > 0)
         {
             _palettePrefab.SelectedPalette = _palettePrefab.PaletteList[0];
@@ -139,7 +127,6 @@ public partial class GTEditor
     public override void OnInspectorGUI()
     {
         _target = target as Greenthumb;
-        // _target = target as GTGrassRenderer;
         _so.Update();
 
         using ( new GUILayout.VerticalScope() )

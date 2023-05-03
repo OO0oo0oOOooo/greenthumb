@@ -304,7 +304,15 @@ public partial class GTEditor
             // Draw the enum popup
             SerializedProperty enumProp = prop.FindPropertyRelative("ActivePrefabScaleMode");
             enumProp.enumValueIndex = EditorGUILayout.Popup("Prefab Scale Mode", enumProp.enumValueIndex, enumProp.enumNames);
-            EditorGUILayout.PropertyField(prop.FindPropertyRelative("ItemMesh"));
+
+            _propMesh = prop.FindPropertyRelative("ItemMesh");
+            EditorGUILayout.PropertyField(_propMesh);
+            _target.SelectedMesh = _propMesh.objectReferenceValue as Mesh;
+
+            _propMaterial = prop.FindPropertyRelative("ItemMaterial");
+            EditorGUILayout.PropertyField(_propMaterial);
+            _target.SelectedMaterial = _propMaterial.objectReferenceValue as Material;
+
             GUILayout.Space(10);
         
             // Draw the appropriate fields based on the enum selection
