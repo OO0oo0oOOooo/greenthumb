@@ -4,15 +4,14 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-// Known Issues: In edit mode if the project is saved or any files in the project are Moved/Created/Deleted 
-// all meshses rendered with Graphics.DrawMeshInstancedIndirect will vanish until the this script is Disabled->Enabled
-
 [ExecuteAlways]
-public class Greenthumb : MonoBehaviour
+public class Greenthumb1 : MonoBehaviour
 {
     // TODO: See if you can remove this
     public PrefabPaletteItem _selectedPaletteItem;
     public DetailPaletteItem _selectedDetailItem;
+
+    // TODO: Use a individual class for each Palette Item
 
     // Grass Rendering
     [Header("Parameters")]
@@ -31,27 +30,19 @@ public class Greenthumb : MonoBehaviour
     private ShadowCastingMode _castShadows = ShadowCastingMode.Off;
     private bool _receiveShadows = true;
 
-    private Dictionary<string, Dictionary<string, Chunk>> _chunkCache = new Dictionary<string, Dictionary<string, Chunk>>();
-    // private Dictionary<string, Chunk> _ChunkCache = new Dictionary<string, Chunk>();
+    private Dictionary<string, Chunk> _ChunkCache = new Dictionary<string, Chunk>();
     private Chunk GetChunkDictionary(string id, Vector3 center)
     {
-        Debug.Log(SelectedMesh.name);
-        if (!_chunkCache.ContainsKey(SelectedMesh.name))
-        {
-            _chunkCache[SelectedMesh.name] = new Dictionary<string, Chunk>();
-        }
-        
-        Dictionary<string, Chunk> chunkDict = _chunkCache[SelectedMesh.name];
-        if (!chunkDict.ContainsKey(id))
+        if (!_ChunkCache.ContainsKey(id))
         {
             Bounds bounds = new Bounds(center, new Vector3(_chunkSize, _chunkSize, _chunkSize));
             Chunk chunk = new Chunk(id, SelectedMesh, bounds, SelectedMaterial);
 
-            chunkDict[id] = chunk;
+            _ChunkCache[id] = chunk;
             Chunks.Add(chunk);
         }
 
-        return chunkDict[id];
+        return _ChunkCache[id];
     }
 
     private bool _canUpdate = false;
@@ -178,7 +169,7 @@ public class Greenthumb : MonoBehaviour
         }
 
         // Clear Chunks
-        _chunkCache.Clear();
+        _ChunkCache.Clear();
         Chunks = null;
     }
 
