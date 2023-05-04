@@ -309,9 +309,9 @@ public partial class GTEditor
             EditorGUILayout.PropertyField(_propMesh);
             _target.SelectedMesh = _propMesh.objectReferenceValue as Mesh;
 
-            _propMaterial = prop.FindPropertyRelative("ItemMaterial");
-            EditorGUILayout.PropertyField(_propMaterial);
-            _target.SelectedMaterial = _propMaterial.objectReferenceValue as Material;
+            // _propMaterial = prop.FindPropertyRelative("ItemMaterial");
+            // EditorGUILayout.PropertyField(_propMaterial);
+            // _target.SelectedMaterial = _propMaterial.objectReferenceValue as Material;
 
             GUILayout.Space(10);
         
