@@ -58,6 +58,11 @@ public class Greenthumb : MonoBehaviour
 
     private Camera _cam;
 
+    private void Start()
+    {
+        SelectedMaterial = (Material)Resources.Load("GTURP");
+    }
+
     private void OnEnable()
     {
         _selectedPaletteItem = null;
