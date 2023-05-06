@@ -351,7 +351,10 @@ public partial class GTEditor
             if(GUILayout.Button("Remove Selected"))
             {
                 if(_paletteDetail.GetSelectedPalette.Palette.Contains(_paletteDetail.SelectedPaletteItem))
+                {
                     _paletteDetail.GetSelectedPalette.Palette.Remove(_paletteDetail.SelectedPaletteItem);
+                    _target.ReleaseChunksWithThisMesh(_target.SelectedMesh);
+                }
             }
         }
     }

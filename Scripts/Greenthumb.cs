@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -13,6 +12,9 @@ public class Greenthumb : MonoBehaviour
     // TODO: See if you can remove this
     public PrefabPaletteItem _selectedPaletteItem;
     public DetailPaletteItem _selectedDetailItem;
+
+    private bool _canUpdate = false;
+    private Camera _cam;
 
     // Grass Rendering
     [Header("Parameters")]
@@ -53,10 +55,6 @@ public class Greenthumb : MonoBehaviour
 
         return chunkDict[id];
     }
-
-    private bool _canUpdate = false;
-
-    private Camera _cam;
 
     private void Start()
     {
@@ -128,7 +126,7 @@ public class Greenthumb : MonoBehaviour
 
     private void OnDestroy()
     {
-        ReleaseChunk();
+        ReleaseAllChunksData();
     }
 
     private void LateUpdate()
@@ -153,9 +151,9 @@ public class Greenthumb : MonoBehaviour
 
     private void ReleaseChunkBuffers()
     {
-        for (int i = 0; i < Chunks.Count; ++i)
+        foreach (var chunk in Chunks)
         {
-            ReleaseBuffers(Chunks[i]);
+            ReleaseBuffers(chunk);
         }
     }
 
@@ -175,7 +173,7 @@ public class Greenthumb : MonoBehaviour
         }
     }
 
-    private void ReleaseChunk()
+    private void ReleaseAllChunksData()
     {
         foreach (var chunk in Chunks)
         {
@@ -200,12 +198,48 @@ public class Greenthumb : MonoBehaviour
             DestroyImmediate(chunk.Material);
             chunk.Material = null;
         }
+    }
 
-        // if (chunk.Mesh != null)
+    public void ReleaseChunksWithThisMesh(Mesh mesh)
+    {
+        for (int i = 0; i < Chunks.Count; i++)
+        {
+            Chunk chunk = Chunks[i];
+
+            if(chunk.Mesh == mesh)
+            {
+                ReleaseChunkData(chunk);
+                ReleaseBuffers(chunk);
+
+                Chunks.Remove(chunk);
+                Dictionary<string, Chunk> chunkDict = _chunkCache[SelectedMesh.name];
+                chunkDict.Remove(chunk.ID);
+            }
+        }
+
+        // foreach (var chunk in Chunks)
         // {
-        //     DestroyImmediate(chunk.Mesh);
-        //     chunk.Mesh = null;
+        //     if(chunk.Mesh == mesh)
+        //     {
+        //         ReleaseChunkData(chunk);
+        //         ReleaseBuffers(chunk);
+
+        //         Chunks.Remove(chunk);
+        //     }
         // }
+    }
+
+    public void ReleaseChunks()
+    {
+        foreach (var chunk in Chunks)
+        {
+            ReleaseChunkData(chunk);
+            ReleaseBuffers(chunk);
+        }
+
+        // Clear Chunks
+        _chunkCache.Clear();
+        Chunks = null;
     }
 
     public void UpdateChunkDataIndirect(Vector3 position, Quaternion rotation, Vector3 scale, Vector4 color)
