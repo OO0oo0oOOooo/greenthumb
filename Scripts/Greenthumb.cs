@@ -216,17 +216,6 @@ public class Greenthumb : MonoBehaviour
                 chunkDict.Remove(chunk.ID);
             }
         }
-
-        // foreach (var chunk in Chunks)
-        // {
-        //     if(chunk.Mesh == mesh)
-        //     {
-        //         ReleaseChunkData(chunk);
-        //         ReleaseBuffers(chunk);
-
-        //         Chunks.Remove(chunk);
-        //     }
-        // }
     }
 
     public void ReleaseChunks()
