@@ -21,13 +21,6 @@ public class Chunk
     // Constructor
     public Chunk(string id, Mesh mesh, Bounds bounds, Material material) //  List<MeshData> meshData, uint population,  ComputeBuffer argsBuffer, ComputeBuffer meshDataBuffer,
     {
-        // Mesh newMesh = new Mesh();
-        // newMesh.vertices = mesh.vertices;
-        // newMesh.triangles = mesh.triangles;
-        // newMesh.normals = mesh.normals;
-        // newMesh.uv = mesh.uv;
-
-        // this.Mesh = newMesh;
         this.ID = id;
         this.Mesh = mesh;
         this.Material = new Material(material);
