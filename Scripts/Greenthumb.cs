@@ -202,20 +202,35 @@ public class Greenthumb : MonoBehaviour
 
     public void ReleaseChunksWithThisMesh(Mesh mesh)
     {
-        for (int i = 0; i < Chunks.Count; i++)
+        foreach (Chunk chunk in Chunks)
         {
-            Chunk chunk = Chunks[i];
-
-            if(chunk.Mesh == mesh)
+            if(chunk.Mesh.name == mesh.name)
             {
-                ReleaseChunkData(chunk);
+                print(chunk.Mesh.name);
                 ReleaseBuffers(chunk);
+                ReleaseChunkData(chunk);
 
                 Chunks.Remove(chunk);
                 Dictionary<string, Chunk> chunkDict = _chunkCache[SelectedMesh.name];
                 chunkDict.Remove(chunk.ID);
             }
         }
+
+        // for (int i = 0; i < Chunks.Count; i++)
+        // {
+        //     Chunk chunk = Chunks[i];
+
+        //     if(chunk.Mesh.name == mesh.name)
+        //     {
+        //         print(chunk.Mesh.name);
+        //         ReleaseBuffers(chunk);
+        //         ReleaseChunkData(chunk);
+
+        //         Chunks.Remove(chunk);
+        //         Dictionary<string, Chunk> chunkDict = _chunkCache[SelectedMesh.name];
+        //         chunkDict.Remove(chunk.ID);
+        //     }
+        // }
     }
 
     public void ReleaseChunks()

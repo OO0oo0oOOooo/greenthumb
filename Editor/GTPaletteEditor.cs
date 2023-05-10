@@ -80,12 +80,12 @@ public partial class GTEditor
     {
         using ( new GUILayout.HorizontalScope() )
         {
-            if(GUILayout.Button("New"))
+            if(GUILayout.Button("+"))
             {
                 PaletteAddItem();
             }
 
-            if(GUILayout.Button("Remove Selected"))
+            if(GUILayout.Button("-"))
             {
                 if(_palettePrefab.GetSelectedPalette.Palette.Contains(_palettePrefab.SelectedPaletteItem))
                     _palettePrefab.GetSelectedPalette.Palette.Remove(_palettePrefab.SelectedPaletteItem);
@@ -343,12 +343,12 @@ public partial class GTEditor
     {
         using ( new GUILayout.HorizontalScope() )
         {
-            if(GUILayout.Button("New"))
+            if(GUILayout.Button("+"))
             {
                 DetailAddItem();
             }
 
-            if(GUILayout.Button("Remove Selected"))
+            if(GUILayout.Button("-"))
             {
                 if(_paletteDetail.GetSelectedPalette.Palette.Contains(_paletteDetail.SelectedPaletteItem))
                 {
