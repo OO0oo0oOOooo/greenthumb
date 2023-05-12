@@ -239,11 +239,13 @@ public partial class GTEditor
     #region  Detail Palette GUI
     private void DetailPaletteSelectionGUI()
     {
-        using ( new GUILayout.HorizontalScope() )
+        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical("toolbar");
+        using ( new GUILayout.HorizontalScope())
         {
             _paletteDetail.SelectedPaletteIndex = EditorGUILayout.Popup(_paletteDetail.SelectedPaletteIndex, _paletteDetail.PaletteNameList.ToArray());
 
-            if(GUILayout.Button("New"))
+            if(GUILayout.Button("New")) //, GUILayout.Height(25) // The lid for the plastic caps that handle the size adjustment is broken
             {
                 // Create New Palette
                 DetailPalette palette = CreateInstance<DetailPalette>();
@@ -262,7 +264,7 @@ public partial class GTEditor
                 Debug.Log("Creating new Palette.");
             }
 
-            if(GUILayout.Button("Del"))
+            if(GUILayout.Button("Del")) //, GUILayout.Height(25)
             {
                 if(_paletteDetail.PaletteList.Count <= 0) return;
                 
@@ -285,6 +287,28 @@ public partial class GTEditor
                 else Debug.Log("Asset doesnt exist.");
             }
         }
+        GUILayout.EndVertical();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical("HelpBox");
+
+        using ( new GUILayout.HorizontalScope() )
+        {
+            if(GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25))) // "miniButtonLeft",
+            {
+                DetailAddItem();
+            }
+
+            if(GUILayout.Button("-", GUILayout.Width(25), GUILayout.Height(25))) // "miniButtonRight",
+            {
+                if(_paletteDetail.GetSelectedPalette.Palette.Contains(_paletteDetail.SelectedPaletteItem))
+                {
+                    _paletteDetail.GetSelectedPalette.Palette.Remove(_paletteDetail.SelectedPaletteItem);
+                    _target.ReleaseChunksWithThisMesh(_target.SelectedMesh);
+                }
+            }
+        }
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
     }
 
     // TODO: Add the GUI for highlighted Palette Items
@@ -309,12 +333,12 @@ public partial class GTEditor
             // EditorGUILayout.PropertyField(_propMaterial);
             // _target.SelectedMaterial = _propMaterial.objectReferenceValue as Material;
 
+            GUILayout.Space(10);
+
             // Draw the enum popup
             SerializedProperty enumProp = prop.FindPropertyRelative("ActivePrefabScaleMode");
             enumProp.enumValueIndex = EditorGUILayout.Popup("Prefab Scale Mode", enumProp.enumValueIndex, enumProp.enumNames);
 
-            GUILayout.Space(10);
-        
             // Draw the appropriate fields based on the enum selection
             switch ((PrefabScaleMode)enumProp.enumValueIndex)
             {
@@ -341,14 +365,18 @@ public partial class GTEditor
 
     private void DetailAddRemoveItemGUI()
     {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+
+        GUILayout.BeginVertical("HelpBox");
         using ( new GUILayout.HorizontalScope() )
         {
-            if(GUILayout.Button("+"))
+            if(GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25)))
             {
                 DetailAddItem();
             }
 
-            if(GUILayout.Button("-"))
+            if(GUILayout.Button("-", GUILayout.Width(25), GUILayout.Height(25)))
             {
                 if(_paletteDetail.GetSelectedPalette.Palette.Contains(_paletteDetail.SelectedPaletteItem))
                 {
@@ -357,6 +385,8 @@ public partial class GTEditor
                 }
             }
         }
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
     }
 
     private void DetailAddItem(Mesh mesh = null)
@@ -374,7 +404,7 @@ public partial class GTEditor
         if(_paletteDetail.GetSelectedPalette == null) return;
         if(_paletteDetail.GetSelectedPalette.Palette.Count == 1) _paletteDetail.SelectedPaletteItem = _paletteDetail.GetSelectedPalette.Palette[0];
 
-        DetailAddRemoveItemGUI();
+        // DetailAddRemoveItemGUI();
         
         float itemSize = Screen.width/_columns-_spacing-_paddingOffset;
 
