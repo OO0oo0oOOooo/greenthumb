@@ -16,7 +16,8 @@ public partial class GTEditor
     private int _padding = 2;
     private float _spacing => _padding*2;
     private int _paddingOffset => _padding / 2;
-    private Color _selectionColor = new Color(0, 0, 1, 0.05f);
+    private Color _bgColor = new Color(0.8f, 0.8f, 0.8f, 0.2f);
+    private Color _selectionColor = new Color(0, 0, 1, 0.1f);
     private Vector2 _scrollPosition = Vector2.zero;
 
     private GUIContent _paletteItemsLabel = new GUIContent("Palette Item");
@@ -28,6 +29,8 @@ public partial class GTEditor
     #region Prefab Palette GUI 
     private void PrefabPaletteSelectionGUI()
     {
+        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical("toolbar");
         using ( new GUILayout.HorizontalScope() )
         {
             _palettePrefab.SelectedPaletteIndex = EditorGUILayout.Popup(_palettePrefab.SelectedPaletteIndex, _palettePrefab.PaletteNameList.ToArray());
@@ -74,23 +77,51 @@ public partial class GTEditor
                 else Debug.Log("Asset doesnt exist.");
             }
         }
-    }
-    
-    private void PrefabAddRemoveItemGUI()
-    {
+        GUILayout.EndVertical();
+
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical("HelpBox");
+
         using ( new GUILayout.HorizontalScope() )
         {
-            if(GUILayout.Button("+"))
+            if(GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25)))
             {
                 PaletteAddItem();
             }
 
-            if(GUILayout.Button("-"))
+            if(GUILayout.Button("-", GUILayout.Width(25), GUILayout.Height(25)))
             {
                 if(_palettePrefab.GetSelectedPalette.Palette.Contains(_palettePrefab.SelectedPaletteItem))
                     _palettePrefab.GetSelectedPalette.Palette.Remove(_palettePrefab.SelectedPaletteItem);
             }
         }
+
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
+    }
+    
+    private void PrefabAddRemoveItemGUI()
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        GUILayout.BeginVertical("HelpBox");
+
+        using ( new GUILayout.HorizontalScope() )
+        {
+            if(GUILayout.Button("+", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                PaletteAddItem();
+            }
+
+            if(GUILayout.Button("-", GUILayout.Width(25), GUILayout.Height(25)))
+            {
+                if(_palettePrefab.GetSelectedPalette.Palette.Contains(_palettePrefab.SelectedPaletteItem))
+                    _palettePrefab.GetSelectedPalette.Palette.Remove(_palettePrefab.SelectedPaletteItem);
+            }
+        }
+
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
     }
 
     private void PaletteAddItem(UnityEngine.Object draggedObject = null)
@@ -151,7 +182,7 @@ public partial class GTEditor
         if(_palettePrefab.GetSelectedPalette == null) return;
         if(_palettePrefab.GetSelectedPalette.Palette.Count == 1) _palettePrefab.SelectedPaletteItem = _palettePrefab.GetSelectedPalette.Palette[0];
 
-        PrefabAddRemoveItemGUI();
+        // PrefabAddRemoveItemGUI();
         
         float itemSize = Screen.width/_columns-_spacing-_paddingOffset;
 
@@ -183,6 +214,7 @@ public partial class GTEditor
             PrefabPaletteItem item = _palettePrefab.GetSelectedPalette.Palette[i];
             GameObject go = item.Prefab;
             Texture2D preview = AssetPreview.GetAssetPreview(go);
+            EditorGUI.DrawRect(cellRect, _bgColor);
 
             if(preview != null)
                 EditorGUI.DrawPreviewTexture(cellRect, preview, null, ScaleMode.ScaleToFit, 0f);
@@ -234,7 +266,6 @@ public partial class GTEditor
     }
     #endregion
 
-    
 
     #region  Detail Palette GUI
     private void DetailPaletteSelectionGUI()
@@ -288,6 +319,7 @@ public partial class GTEditor
             }
         }
         GUILayout.EndVertical();
+
         GUILayout.FlexibleSpace();
         GUILayout.BeginVertical("HelpBox");
 
@@ -436,6 +468,7 @@ public partial class GTEditor
             DetailPaletteItem item = _paletteDetail.GetSelectedPalette.Palette[i];
             Mesh go = item.ItemMesh;
             Texture2D preview = AssetPreview.GetAssetPreview(go);
+            EditorGUI.DrawRect(cellRect, _bgColor);
 
             if(preview != null)
                 EditorGUI.DrawPreviewTexture(cellRect, preview, null, ScaleMode.ScaleToFit, 0f);
